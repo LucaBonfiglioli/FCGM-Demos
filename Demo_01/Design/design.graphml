@@ -15,7 +15,7 @@
     <node id="n0">
       <data key="d5">
         <y:UMLClassNode>
-          <y:Geometry height="280.9232967542504" width="334.8686589927047" x="860.1438639876351" y="139.48292259648645"/>
+          <y:Geometry height="280.9232967542504" width="334.8686589927047" x="814.8752859987187" y="-184.21309434312212"/>
           <y:Fill color="#607D8B" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="40.11181640625" x="147.37842129322735" xml:space="preserve" y="3.0">Entity</y:NodeLabel>
@@ -43,7 +43,7 @@
     <node id="n1">
       <data key="d5">
         <y:UMLClassNode>
-          <y:Geometry height="124.75351047913446" width="263.83917086326437" x="-118.75489975040304" y="-297.74648952086545"/>
+          <y:Geometry height="124.75351047913446" width="263.83917086326437" x="-36.98677793958069" y="-297.74648952086545"/>
           <y:Fill color="#4CAF50" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="112.34814453125" x="75.74551316600719" xml:space="preserve" y="26.701171875">CommandEmitter</y:NodeLabel>
@@ -53,7 +53,7 @@
 &lt;i&gt;
 + sub(listener: CommandListener) : void &lt;br&gt;
 + unsub(listener: CommandListener) : void&lt;br&gt;
-+ notify() : void&lt;br&gt;
++ emit(Command cmd) : void&lt;br&gt;
 &lt;/i&gt;
 &lt;/html&gt;</y:MethodLabel>
           </y:UML>
@@ -63,7 +63,7 @@
     <node id="n2">
       <data key="d5">
         <y:UMLClassNode>
-          <y:Geometry height="92.0" width="125.0" x="1334.4654897604328" y="557.1009104520865"/>
+          <y:Geometry height="92.0" width="125.0" x="614.9547713555414" y="232.60637298311167"/>
           <y:Fill color="#4CAF50" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="58.18994140625" x="33.405029296875" xml:space="preserve" y="26.701171875">Interface</y:NodeLabel>
@@ -95,13 +95,18 @@
     <node id="n4">
       <data key="d5">
         <y:UMLClassNode>
-          <y:Geometry height="172.0" width="387.2033275034229" x="-69.75" y="282.1425811437403"/>
+          <y:Geometry height="149.47385174652243" width="366.5957388298972" x="-88.3650619228971" y="289.7422648531684"/>
           <y:Fill color="#607D8B" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="84.90087890625" x="151.15122429858644" xml:space="preserve" y="3.0">OpenGLView</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="84.90087890625" x="140.8474299618236" xml:space="preserve" y="3.0">OpenGLView</y:NodeLabel>
           <y:UML clipContent="true" constraint="" detailsColor="#FFFFFF" omitDetails="false" stereotype="" use3DEffect="false">
-            <y:AttributeLabel xml:space="preserve"/>
-            <y:MethodLabel xml:space="preserve"/>
+            <y:AttributeLabel xml:space="preserve">- commandEmitter : OpenGLCommandEmitter</y:AttributeLabel>
+            <y:MethodLabel xml:space="preserve">+ OpenGLView() : OpenGLView
++ drawScene() : void
++ resize(w: int, h: int) : void
++ startGameLoop(presenter: presenter) : void
++ manageControlPressed(key: unsigned char, x: int, y: int) : void
++ manageControlReleased(key: unsigned char, x: int, y: int) : void</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -109,7 +114,7 @@
     <node id="n5">
       <data key="d5">
         <y:UMLClassNode>
-          <y:Geometry height="190.25" width="311.0" x="872.0781934839874" y="522.2654888408036"/>
+          <y:Geometry height="190.25" width="311.0" x="826.8096154950711" y="183.4813729831116"/>
           <y:Fill color="#607D8B" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="79.1435546875" x="115.92822265625" xml:space="preserve" y="3.0">PlayerEntity</y:NodeLabel>
@@ -123,21 +128,7 @@
     <node id="n6">
       <data key="d5">
         <y:UMLClassNode>
-          <y:Geometry height="92.0" width="125.0" x="61.35166375171144" y="68.44955196290559"/>
-          <y:Fill color="#4CAF50" transparent="false"/>
-          <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="33.62451171875" x="45.687744140625" xml:space="preserve" y="26.701171875">View</y:NodeLabel>
-          <y:UML clipContent="true" constraint="" detailsColor="#FFFFFF" omitDetails="true" stereotype="interface" use3DEffect="false">
-            <y:AttributeLabel xml:space="preserve"/>
-            <y:MethodLabel xml:space="preserve"/>
-          </y:UML>
-        </y:UMLClassNode>
-      </data>
-    </node>
-    <node id="n7">
-      <data key="d5">
-        <y:UMLClassNode>
-          <y:Geometry height="124.75351047913446" width="318.46773882989714" x="378.4121120379108" y="-97.24432856259665"/>
+          <y:Geometry height="149.47385174652246" width="318.46773882989714" x="378.4121120379108" y="-118.48837183925815"/>
           <y:Fill color="#607D8B" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="63.97900390625" x="127.24436746182357" xml:space="preserve" y="3.0">Presenter</y:NodeLabel>
@@ -146,7 +137,27 @@
 - view : View
 - commands : vector&lt;Command&gt;</y:AttributeLabel>
             <y:MethodLabel xml:space="preserve">+ Presenter() : Presenter
++ startGameLoop() : void
++ gameLoop() : void
 + receive(cmd: Command) : void</y:MethodLabel>
+          </y:UML>
+        </y:UMLClassNode>
+      </data>
+    </node>
+    <node id="n7">
+      <data key="d5">
+        <y:UMLClassNode>
+          <y:Geometry height="130.8689165378671" width="366.5957388298972" x="-88.3650619228971" y="-104.65017180834627"/>
+          <y:Fill color="#607D8B" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="163.62451171875" x="101.4856135555736" xml:space="preserve" y="3.0">OpenGLCommandEmitter</y:NodeLabel>
+          <y:UML clipContent="true" constraint="" detailsColor="#FFFFFF" omitDetails="false" stereotype="" use3DEffect="false">
+            <y:AttributeLabel xml:space="preserve">- listeners : vector&lt;CommandListener&gt;</y:AttributeLabel>
+            <y:MethodLabel xml:space="preserve">+ sub(listener: CommadnListener) : void
++ unsub(listener: CommandListener) : void
++ emit(Command cmd) : void
++ manageControlPressed(key: unsigned char, x: int, y: int) : void
++ manageControlReleased(key: unsigned char, x: int, y: int) : void</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -154,15 +165,18 @@
     <node id="n8">
       <data key="d5">
         <y:UMLClassNode>
-          <y:Geometry height="104.75691653786714" width="318.46773882989714" x="-146.06918373371943" y="-104.65017180834627"/>
-          <y:Fill color="#607D8B" transparent="false"/>
+          <y:Geometry height="99.0308995363215" width="258.10841555785066" x="-34.121400286873836" y="120.64877421947449"/>
+          <y:Fill color="#4CAF50" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="163.62451171875" x="77.42161355557357" xml:space="preserve" y="3.0">OpenGLCommandEmitter</y:NodeLabel>
-          <y:UML clipContent="true" constraint="" detailsColor="#FFFFFF" omitDetails="false" stereotype="" use3DEffect="false">
-            <y:AttributeLabel xml:space="preserve">- listeners : vector&lt;CommandListener&gt;</y:AttributeLabel>
-            <y:MethodLabel xml:space="preserve">+ sub(listener: CommadnListener) : void
-+ unsub(listener: CommandListener) : void
-+ notify() : void</y:MethodLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="33.62451171875" x="112.24195191955033" xml:space="preserve" y="26.701171875">View</y:NodeLabel>
+          <y:UML clipContent="true" constraint="" detailsColor="#FFFFFF" omitDetails="false" stereotype="interface" use3DEffect="false">
+            <y:AttributeLabel xml:space="preserve"/>
+            <y:MethodLabel xml:space="preserve">&lt;html&gt;
+&lt;i&gt;
++ startGameLoop(presenter: Presenter) : void
+&lt;/i&gt;&lt;br&gt;
++ drawScene() : void &lt;br&gt;
+&lt;/html&gt;</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -188,7 +202,7 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e2" source="n7" target="n3">
+    <edge id="e2" source="n6" target="n3">
       <data key="d7" xml:space="preserve"/>
       <data key="d9">
         <y:PolyLineEdge>
@@ -199,7 +213,7 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e3" source="n4" target="n6">
+    <edge id="e3" source="n7" target="n1">
       <data key="d7" xml:space="preserve"/>
       <data key="d9">
         <y:PolyLineEdge>
@@ -210,12 +224,37 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e4" source="n7" target="n6">
+    <edge id="e4" source="n6" target="n0">
       <data key="d7" xml:space="preserve"/>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-60.47243136009263" sy="2.227631342051336" tx="0.0" ty="0.0">
-            <y:Point x="477.17355009276673" y="114.44955196290559"/>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="white_diamond" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e5" source="n7" target="n3">
+      <data key="d7" xml:space="preserve"/>
+      <data key="d9">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="0.0" tx="-31.28211741109783" ty="32.22128369547991">
+            <y:Point x="334.4546875000001" y="-39.21571353941272"/>
+            <y:Point x="334.4546875000001" y="-203.14845058581835"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="white_diamond" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e6" source="n6" target="n8">
+      <data key="d7" xml:space="preserve"/>
+      <data key="d9">
+        <y:PolyLineEdge>
+          <y:Path sx="-23.59129395285936" sy="1.7825397159970038" tx="0.0" ty="0.0">
+            <y:Point x="514.0546875" y="170.16422398763524"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -223,7 +262,7 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e5" source="n8" target="n1">
+    <edge id="e7" source="n4" target="n8">
       <data key="d7" xml:space="preserve"/>
       <data key="d9">
         <y:PolyLineEdge>
@@ -234,29 +273,30 @@
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e6" source="n7" target="n0">
+    <edge id="e8" source="n8" target="n6">
       <data key="d7" xml:space="preserve"/>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="60.63976918086553" sy="14.030076769002958" tx="-38.92260662574888" ty="-75.99677155942999">
-            <y:Point x="598.2857506337249" y="203.94779941418165"/>
+          <y:Path sx="32.83650286493787" sy="15.549762857378653" tx="0.0" ty="0.0">
+            <y:Point x="537.6459814528594" y="185.7139868450139"/>
           </y:Path>
-          <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="white_diamond" target="standard"/>
+          <y:LineStyle color="#000000" type="dashed" width="1.0"/>
+          <y:Arrows source="none" target="plain"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e7" source="n8" target="n3">
+    <edge id="e9" source="n4" target="n7">
       <data key="d7" xml:space="preserve"/>
+      <data key="d8"/>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="0.0" tx="-31.28211741109783" ty="32.22128369547991">
-            <y:Point x="279.69060283619746" y="-52.2717135394127"/>
-            <y:Point x="279.69060283619746" y="-203.14845058581835"/>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+            <y:Point x="-166.09375" y="364.47919072642964"/>
+            <y:Point x="-166.09375" y="-39.21571353941272"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
-          <y:Arrows source="white_diamond" target="standard"/>
+          <y:Arrows source="none" target="standard"/>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
