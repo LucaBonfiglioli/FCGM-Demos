@@ -8,7 +8,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
-#define FRAMETIME 16
+#define FRAMETIME 0
 
 class OpenGLView : 
 	public View
@@ -22,7 +22,7 @@ public:
 	virtual void manageControlPressed(unsigned char key, int x, int y);
 	virtual void manageControlReleased(unsigned char key, int x, int y);
 	virtual void startGameLoop(Presenter * presenter);
-	virtual void drawTriangle(float x, float y);
+	virtual void drawCircle(float x, float y, float radius);
 	~OpenGLView();
 };
 

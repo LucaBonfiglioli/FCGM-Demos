@@ -25,8 +25,8 @@ OpenGLView::OpenGLView()
 void OpenGLView::drawScene()
 {
 	glutSwapBuffers();
-	glClearColor(0.1, 0.1, 0.1, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClearColor(0.1, 0.1, 0.1, 1.0);
+	//glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void OpenGLView::resize(int w, int h)
@@ -56,7 +56,7 @@ void OpenGLView::startGameLoop(Presenter * presenter)
 	glutMainLoop();
 }
 
-void OpenGLView::drawTriangle(float x, float y)
+void OpenGLView::drawCircle(float x, float y, float radius)
 {
 	x += SCREEN_WIDTH / 2;
 	y += SCREEN_HEIGHT / 2;
@@ -65,10 +65,10 @@ void OpenGLView::drawTriangle(float x, float y)
 	glScalef(scale, scale, 1.0);*/
 
 	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	float twicepi = 2 * 3.142;
 	glBegin(GL_POLYGON);
-	glVertex2f(x, y + 5.0f);
-	glVertex2f(x - 5.0f, y - 5.0f);
-	glVertex2f(x + 5.0f, y - 5.0f);
+	for (float a = 0; a < twicepi; a += twicepi / 20)
+		glVertex2d(x + radius * cos(a), y + radius * sin(a));
 	glEnd();
 	glPopMatrix();
 }

@@ -7,13 +7,15 @@ Presenter::Presenter()
 {
 	this->entities = new std::vector<Entity*>();
 	this->view = new OpenGLView();
-	this->player = new Entity(50.0f, 500.0f, vec{ 0.0f, 0.0f }, vec{ 0.0f, 0.0f });
+	this->player = new Entity(1.0f, 500.0f, vec{ 0.0f, 0.0f }, vec{ 0.0f, 0.0f }, 10.0f);
 	
 	for (int i = 0; i < COMMANDS; i++)
 		this->keys[i] = false;
 
-	entities->push_back(new Entity(50.0f, 50.0f, vec{ -50.0f, 0.0f }, vec{ 0.0f, 0.6f }));
-	entities->push_back(new Entity(50.0f, 50.0f, vec{ +50.0f, 0.0f }, vec{ 0.0f, -0.6f }));
+	//entities->push_back(new Entity(50.0f, 50.0f, vec{ -50.0f, 0.0f }, vec{ 0.0f, 0.6f }, 30.0f));
+	entities->push_back(new Entity(1000.0f, 1000.0f, vec{ +50.0f, 0.0f }, vec{ 0.0f, 0.0f }, 30.0f));
+
+	this->lastFrame = std::chrono::high_resolution_clock::now();
 }
 
 void Presenter::receive(Command cmd)
@@ -28,6 +30,10 @@ void Presenter::startGameLoop()
 
 void Presenter::gameLoop()
 {
+	std::chrono::high_resolution_clock::time_point curtime = std::chrono::high_resolution_clock::now();
+	long long frameTime = std::chrono::duration_cast<std::chrono::nanoseconds>(curtime - this->lastFrame).count();
+	this->lastFrame = curtime;
+	float frameTimeMillis = (float)frameTime / 1000000000;
 	for (int i = 0; i < this->entities->size(); i++)
 	{
 		vec totalForce{ 0.0f, 0.0f };
@@ -39,7 +45,7 @@ void Presenter::gameLoop()
 			totalForce.x += force.x;
 			totalForce.y += force.y;
 		}
-		this->entities->at(i)->move(totalForce, 1.0f);
+		this->entities->at(i)->move(totalForce, frameTimeMillis);
 		this->presentEntity(this->entities->at(i));
 	}
 
@@ -51,14 +57,14 @@ void Presenter::gameLoop()
 		playerForce.y += force.y;
 	}
 	if (this->keys[FORWARD])
-		playerForce.y += 5.f;
+		playerForce.y += THRUST_FORCE;
 	if (this->keys[BACK])
-		playerForce.y -= 5.f;
+		playerForce.y -= THRUST_FORCE;
 	if (this->keys[LEFT])
-		playerForce.x -= 5.f;
+		playerForce.x -= THRUST_FORCE;
 	if (this->keys[RIGHT])
-		playerForce.x += 5.f;
-	this->player->move(playerForce, 1.0f);
+		playerForce.x += THRUST_FORCE;
+	this->player->move(playerForce, frameTimeMillis);
 
 	if (player->getPos().x > 400)
 	{
@@ -88,7 +94,7 @@ void Presenter::gameLoop()
 
 void Presenter::presentEntity(Entity * entity)
 {
-	view->drawTriangle(entity->getPos().x, entity->getPos().y);
+	view->drawCircle(entity->getPos().x, entity->getPos().y, entity->getRadius());
 }
 
 Presenter::~Presenter()
