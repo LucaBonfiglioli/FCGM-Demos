@@ -51,7 +51,7 @@ void Entity::setVel(vec vel)
 	this->vel = vel;
 }
 
-float Entity::getRadius()
+float Entity::getRadius() const
 {
 	return this->radius;
 }
@@ -76,6 +76,28 @@ void Entity::move(vec force, float time)
 	vel.x += acc.x * time;
 	vel.y += acc.y * time;
 	this->setVel(vel);
+
+	if (this->getPos().x > 400)
+	{
+		this->setPos(vec{ 400.0f, this->getPos().y });
+		this->setVel(vec{ -this->getVel().x, this->getVel().y });
+	}
+	if (this->getPos().x < -400)
+	{
+		this->setPos(vec{ -400.0f, this->getPos().y });
+		this->setVel(vec{ -this->getVel().x, this->getVel().y });
+	}
+	if (this->getPos().y > 300)
+	{
+		this->setPos(vec{ this->getPos().x, 300.0f });
+		this->setVel(vec{ this->getVel().x, -this->getVel().y });
+	}
+	if (this->getPos().y < -300)
+	{
+		this->setPos(vec{ this->getPos().x, -300.0f });
+		this->setVel(vec{ this->getVel().x, -this->getVel().y });
+	}
+
 }
 
 vec Entity::getAccelerationAt(vec pos) const
@@ -103,6 +125,32 @@ vec Entity::getForceAt(Entity * e) const
 		force.y *= e->getGmass();
 	}
 	return force;
+}
+
+bool Entity::areColliding(Entity * e1, Entity * e2) 
+{
+	float dist = sqrt(pow(e1->getPos().x - e2->getPos().x, 2) + pow(e1->getPos().y - e2->getPos().y, 2));
+	return dist < (e1->getRadius() + e2->getRadius());
+}
+
+void Entity::handleCollision(Entity * e1, Entity * e2)
+{
+	if (!Entity::areColliding(e1, e2))
+		return;
+	vec v1{ 0.0f, 0.0f };
+	vec v2{ 0.0f, 0.0f };
+	//v1.x = (e1->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e1->getVel().x +
+	//	(e2->getMass() * 2) / (e1->getMass() + e2->getMass())*e2->getVel().x;
+	//v1.y = (e1->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e1->getVel().y +
+	//	(e2->getMass() * 2) / (e1->getMass() + e2->getMass())*e2->getVel().y;
+	//v2.x = (e1->getMass() * 2) / (e1->getMass() + e2->getMass())*e1->getVel().x +
+	//	(e2->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e2->getVel().x;
+	//v2.y = (e1->getMass() * 2) / (e1->getMass() + e2->getMass())*e1->getVel().y +
+	//	(e2->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e2->getVel().y;
+	v1 = vecdiff(e1->getVel(), vecmul(vecdiff(e1->getPos(), e2->getPos()), 2 * e2->getMass() / (e1->getMass() + e2->getMass()) * scalprod(vecdiff(e1->getVel(), e2->getVel()), vecdiff(e1->getPos(), e2->getPos())) / scalprod(vecdiff(e1->getPos(), e2->getPos()), vecdiff(e1->getPos(), e2->getPos()))));
+	v2 = vecdiff(e2->getVel(), vecmul(vecdiff(e2->getPos(), e1->getPos()), 2 * e1->getMass() / (e1->getMass() + e2->getMass()) * scalprod(vecdiff(e2->getVel(), e1->getVel()), vecdiff(e2->getPos(), e1->getPos())) / scalprod(vecdiff(e2->getPos(), e1->getPos()), vecdiff(e2->getPos(), e1->getPos()))));
+	e1->setVel(v1);
+	e2->setVel(v2);
 }
 
 Entity::~Entity()

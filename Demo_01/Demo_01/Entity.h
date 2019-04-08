@@ -20,10 +20,12 @@ public:
 	virtual void setPos(vec pos);
 	virtual vec getVel() const;
 	virtual void setVel(vec vel);
-	virtual float getRadius();
+	virtual float getRadius() const;
 	virtual void setRadius(float value);
 	virtual void move(vec force, float time);
 	virtual vec getAccelerationAt(vec pos) const;
 	virtual vec getForceAt(Entity * e) const;
+	static bool areColliding(Entity * e1, Entity * e2);
+	static void handleCollision(Entity * e1, Entity * e2);
 	~Entity();
 };

@@ -16,7 +16,12 @@ private:
 	Entity * player;
 	View * view;
 	std::chrono::high_resolution_clock::time_point lastFrame;
+
 	virtual void presentEntity(Entity * entity);
+	virtual void moveEntities(float time);
+	virtual void movePlayer(float time);
+	virtual void handleCollisions();
+	virtual float getFrameTime();
 public:
 	Presenter();
 	virtual void receive(Command cmd);

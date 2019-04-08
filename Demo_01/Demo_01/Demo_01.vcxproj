@@ -129,6 +129,7 @@
     <ClInclude Include="View.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="2Dvec.cpp" />
     <ClCompile Include="CommandEmitter.cpp" />
     <ClCompile Include="CommandListener.cpp" />
     <ClCompile Include="Entity.cpp" />

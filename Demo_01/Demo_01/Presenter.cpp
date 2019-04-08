@@ -7,13 +7,14 @@ Presenter::Presenter()
 {
 	this->entities = new std::vector<Entity*>();
 	this->view = new OpenGLView();
-	this->player = new Entity(1.0f, 500.0f, vec{ 0.0f, 0.0f }, vec{ 0.0f, 0.0f }, 10.0f);
+	this->player = new Entity(1.0f, 500.0f, vec{ 200.0f, 200.0f }, vec{ 0.0f, 0.0f }, 10.0f);
 	
 	for (int i = 0; i < COMMANDS; i++)
 		this->keys[i] = false;
 
-	//entities->push_back(new Entity(50.0f, 50.0f, vec{ -50.0f, 0.0f }, vec{ 0.0f, 0.6f }, 30.0f));
-	entities->push_back(new Entity(1000.0f, 1000.0f, vec{ +50.0f, 0.0f }, vec{ 0.0f, 0.0f }, 30.0f));
+	entities->push_back(new Entity(50.0f, 1000.0f, vec{ -50.0f, 0.0f }, vec{ 0.0f, 8.0f }, 20.0f));
+	entities->push_back(new Entity(50.0f, 1000.0f, vec{ +50.0f, 0.0f }, vec{ 0.0f, -8.0f }, 20.0f));
+	entities->push_back(new Entity(50.0f, 1000.0f, vec{ 0.0f, 50.0f }, vec{ 5.0f, -3.0f }, 20.0f));
 
 	this->lastFrame = std::chrono::high_resolution_clock::now();
 }
@@ -28,12 +29,17 @@ void Presenter::startGameLoop()
 	this->view->startGameLoop(this);
 }
 
-void Presenter::gameLoop()
+float Presenter::getFrameTime()
 {
 	std::chrono::high_resolution_clock::time_point curtime = std::chrono::high_resolution_clock::now();
 	long long frameTime = std::chrono::duration_cast<std::chrono::nanoseconds>(curtime - this->lastFrame).count();
 	this->lastFrame = curtime;
 	float frameTimeMillis = (float)frameTime / 1000000000;
+	return frameTimeMillis;
+}
+
+void Presenter::moveEntities(float time)
+{
 	for (int i = 0; i < this->entities->size(); i++)
 	{
 		vec totalForce{ 0.0f, 0.0f };
@@ -45,10 +51,13 @@ void Presenter::gameLoop()
 			totalForce.x += force.x;
 			totalForce.y += force.y;
 		}
-		this->entities->at(i)->move(totalForce, frameTimeMillis);
-		this->presentEntity(this->entities->at(i));
-	}
 
+		this->entities->at(i)->move(totalForce, time);
+	}
+}
+
+void Presenter::movePlayer(float time)
+{
 	vec playerForce{ 0.0f, 0.0f };
 	for (int j = 0; j < this->entities->size(); j++)
 	{
@@ -64,29 +73,33 @@ void Presenter::gameLoop()
 		playerForce.x -= THRUST_FORCE;
 	if (this->keys[RIGHT])
 		playerForce.x += THRUST_FORCE;
-	this->player->move(playerForce, frameTimeMillis);
+	this->player->move(playerForce, time);
+}
 
-	if (player->getPos().x > 400)
-	{
-		player->setPos(vec{ 400.0f, player->getPos().y });
-		player->setVel(vec{ -player->getVel().x, player->getVel().y });
-	}
-	if (player->getPos().x < -400)
-	{
-		player->setPos(vec{ -400.0f, player->getPos().y });
-		player->setVel(vec{ -player->getVel().x, player->getVel().y });
-	}
-	if (player->getPos().y > 300)
-	{
-		player->setPos(vec{ player->getPos().x, 300.0f });
-		player->setVel(vec{ player->getVel().x, -player->getVel().y });
-	}
-	if (player->getPos().y < -300)
-	{
-		player->setPos(vec{ player->getPos().x, -300.0f });
-		player->setVel(vec{ player->getVel().x, -player->getVel().y });
-	}
+void Presenter::handleCollisions()
+{
+	for (int i = 0; i < this->entities->size(); i++)
+		for (int j = i+1; j < this->entities->size(); j++)
+		{
+			if (i == j) continue;
+			Entity::handleCollision(this->entities->at(i), this->entities->at(j));
+		}
 
+	for (int i = 0; i < this->entities->size(); i++)
+		Entity::handleCollision(this->player, this->entities->at(i));
+}
+
+void Presenter::gameLoop()
+{
+	float frameTimeMillis = this->getFrameTime();
+
+	this->handleCollisions();
+
+	this->moveEntities(frameTimeMillis);
+	this->movePlayer(frameTimeMillis);
+
+	for (int i = 0; i < this->entities->size(); i++)
+		this->presentEntity(this->entities->at(i));
 	this->presentEntity(this->player);
 
 	view->drawScene();
