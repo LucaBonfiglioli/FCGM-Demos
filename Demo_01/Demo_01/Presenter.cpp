@@ -2,19 +2,21 @@
 #include "Presenter.h"
 #include "OpenGLView.h"
 #include <iostream>
+#include <ctime>
+#include <random>
 
 Presenter::Presenter()
 {
 	this->entities = new std::vector<Entity*>();
 	this->view = new OpenGLView();
-	this->player = new Entity(1.0f, 500.0f, vec{ 200.0f, 200.0f }, vec{ 0.0f, 0.0f }, 10.0f);
+	this->player = new Player(PLAYER_MASS, 500.0f, vec{ 200.0f, 200.0f }, vec{ 0.0f, 0.0f }, 10.0f, PLAYER_COLOR);
 	
 	for (int i = 0; i < COMMANDS; i++)
 		this->keys[i] = false;
 
-	entities->push_back(new Entity(50.0f, 1000.0f, vec{ -50.0f, 0.0f }, vec{ 0.0f, 8.0f }, 20.0f));
-	entities->push_back(new Entity(50.0f, 1000.0f, vec{ +50.0f, 0.0f }, vec{ 0.0f, -8.0f }, 20.0f));
-	entities->push_back(new Entity(50.0f, 1000.0f, vec{ 0.0f, 50.0f }, vec{ 5.0f, -3.0f }, 20.0f));
+	entities->push_back(new Entity(30.0f, 1000.0f, vec{ -50.0f, 0.0f }, vec{ 0.0f, 8.0f }, 20.0f, this->randomEntityColor()));
+	entities->push_back(new Entity(30.0f, 1000.0f, vec{ +50.0f, 0.0f }, vec{ 0.0f, -8.0f }, 20.0f, this->randomEntityColor()));
+	entities->push_back(new Entity(30.0f, 1000.0f, vec{ 0.0f, 50.0f }, vec{ 5.0f, -3.0f }, 20.0f, this->randomEntityColor()));
 
 	this->lastFrame = std::chrono::high_resolution_clock::now();
 }
@@ -36,6 +38,15 @@ float Presenter::getFrameTime()
 	this->lastFrame = curtime;
 	float frameTimeMillis = (float)frameTime / 1000000000;
 	return frameTimeMillis;
+}
+
+color4f Presenter::randomEntityColor()
+{
+	color4f c = ENTITY_BASE_COLOR;
+	c.r += ENTITY_COLOR_RANGE.r * ((float)rand() / (float)RAND_MAX - 0.5f);
+	c.g += ENTITY_COLOR_RANGE.g * ((float)rand() / (float)RAND_MAX - 0.5f);
+	c.b += ENTITY_COLOR_RANGE.b * ((float)rand() / (float)RAND_MAX - 0.5f);
+	return c;
 }
 
 void Presenter::moveEntities(float time)
@@ -65,14 +76,24 @@ void Presenter::movePlayer(float time)
 		playerForce.x += force.x;
 		playerForce.y += force.y;
 	}
+	vec thrust{ 0.0f, 0.0f };
 	if (this->keys[FORWARD])
-		playerForce.y += THRUST_FORCE;
+		thrust.y += THRUST_FORCE;
 	if (this->keys[BACK])
-		playerForce.y -= THRUST_FORCE;
+		thrust.y -= THRUST_FORCE;
 	if (this->keys[LEFT])
-		playerForce.x -= THRUST_FORCE;
+		thrust.x -= THRUST_FORCE;
 	if (this->keys[RIGHT])
-		playerForce.x += THRUST_FORCE;
+		thrust.x += THRUST_FORCE;
+	if (norm(thrust) > 0 && this->player->getFuel() > 0)
+	{
+		playerForce = vecsum(playerForce, thrust);
+		this->player->consumeFuel(time);
+	}
+	if (norm(thrust) <= 0.01f)
+	{
+		this->player->refillFuel(time);
+	}
 	this->player->move(playerForce, time);
 }
 
@@ -107,7 +128,7 @@ void Presenter::gameLoop()
 
 void Presenter::presentEntity(Entity * entity)
 {
-	view->drawCircle(entity->getPos().x, entity->getPos().y, entity->getRadius());
+	view->drawCircle(entity->getPos().x, entity->getPos().y, entity->getRadius(), entity->getColor());
 }
 
 Presenter::~Presenter()

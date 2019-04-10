@@ -4,6 +4,7 @@
 #include "View.h"
 #include "Entity.h"
 #include "CommandListener.h"
+#include "Player.h"
 
 #define THRUST_FORCE 100.0f
 
@@ -13,7 +14,7 @@ class Presenter :
 private: 
 	std::vector<Entity*> * entities;
 	bool keys[COMMANDS];
-	Entity * player;
+	Player * player;
 	View * view;
 	std::chrono::high_resolution_clock::time_point lastFrame;
 
@@ -22,6 +23,7 @@ private:
 	virtual void movePlayer(float time);
 	virtual void handleCollisions();
 	virtual float getFrameTime();
+	virtual color4f randomEntityColor();
 public:
 	Presenter();
 	virtual void receive(Command cmd);

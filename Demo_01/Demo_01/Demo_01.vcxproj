@@ -121,10 +121,12 @@
   <ItemGroup>
     <ClInclude Include="CommandEmitter.h" />
     <ClInclude Include="CommandListener.h" />
+    <ClInclude Include="commons.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="2Dvec.h" />
     <ClInclude Include="OpenGLCommandEmitter.h" />
     <ClInclude Include="OpenGLView.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Presenter.h" />
     <ClInclude Include="View.h" />
   </ItemGroup>
@@ -136,6 +138,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenGLCommandEmitter.cpp" />
     <ClCompile Include="OpenGLView.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Presenter.cpp" />
     <ClCompile Include="View.cpp" />
   </ItemGroup>

@@ -25,7 +25,7 @@ OpenGLView::OpenGLView()
 void OpenGLView::drawScene()
 {
 	glutSwapBuffers();
-	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClearColor(BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -56,15 +56,12 @@ void OpenGLView::startGameLoop(Presenter * presenter)
 	glutMainLoop();
 }
 
-void OpenGLView::drawCircle(float x, float y, float radius)
+void OpenGLView::drawCircle(float x, float y, float radius, color4f color)
 {
 	x += SCREEN_WIDTH / 2;
 	y += SCREEN_HEIGHT / 2;
 	glPushMatrix();
-	/*glTranslatef(this->currentInWorldPosition.x, this->currentInWorldPosition.y, 0.0);
-	glScalef(scale, scale, 1.0);*/
-
-	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	glColor4f(color.r, color.g, color.b, color.a);
 	float twicepi = 2 * 3.142;
 	glBegin(GL_POLYGON);
 	for (float a = 0; a < twicepi; a += twicepi / 20)
@@ -77,7 +74,7 @@ OpenGLView::~OpenGLView()
 {
 }
 
-// Callback functions
+// Callback C functions
 
 void drawSceneCallback()
 {

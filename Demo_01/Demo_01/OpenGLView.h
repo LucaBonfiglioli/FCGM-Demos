@@ -6,10 +6,6 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
-#define FRAMETIME 0
-
 class OpenGLView : 
 	public View
 {
@@ -22,7 +18,7 @@ public:
 	virtual void manageControlPressed(unsigned char key, int x, int y);
 	virtual void manageControlReleased(unsigned char key, int x, int y);
 	virtual void startGameLoop(Presenter * presenter);
-	virtual void drawCircle(float x, float y, float radius);
+	virtual void drawCircle(float x, float y, float radius, color4f color);
 	~OpenGLView();
 };
 

@@ -1,15 +1,15 @@
 #pragma once
 #include "Entity.h"
 
-Entity::Entity(float mass, float gmass, vec pos, vec vel, float radius)
+Entity::Entity(float mass, float gmass, vec pos, vec vel, float radius, color4f color)
 {
 	this->mass = mass;
 	this->gmass = gmass;
 	this->pos = pos;
 	this->vel = vel;
 	this->radius = radius;
+	this->color = color;
 }
-
 
 float Entity::getMass() const
 {
@@ -59,6 +59,16 @@ float Entity::getRadius() const
 void Entity::setRadius(float value)
 {
 	this->radius = value;
+}
+
+color4f Entity::getColor() const
+{
+	return this->color;
+}
+
+void Entity::setColor(color4f color)
+{
+	this->color = color;
 }
 
 void Entity::move(vec force, float time)
@@ -139,14 +149,6 @@ void Entity::handleCollision(Entity * e1, Entity * e2)
 		return;
 	vec v1{ 0.0f, 0.0f };
 	vec v2{ 0.0f, 0.0f };
-	//v1.x = (e1->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e1->getVel().x +
-	//	(e2->getMass() * 2) / (e1->getMass() + e2->getMass())*e2->getVel().x;
-	//v1.y = (e1->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e1->getVel().y +
-	//	(e2->getMass() * 2) / (e1->getMass() + e2->getMass())*e2->getVel().y;
-	//v2.x = (e1->getMass() * 2) / (e1->getMass() + e2->getMass())*e1->getVel().x +
-	//	(e2->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e2->getVel().x;
-	//v2.y = (e1->getMass() * 2) / (e1->getMass() + e2->getMass())*e1->getVel().y +
-	//	(e2->getMass() - e1->getMass()) / (e1->getMass() + e2->getMass())*e2->getVel().y;
 	v1 = vecdiff(e1->getVel(), vecmul(vecdiff(e1->getPos(), e2->getPos()), 2 * e2->getMass() / (e1->getMass() + e2->getMass()) * scalprod(vecdiff(e1->getVel(), e2->getVel()), vecdiff(e1->getPos(), e2->getPos())) / scalprod(vecdiff(e1->getPos(), e2->getPos()), vecdiff(e1->getPos(), e2->getPos()))));
 	v2 = vecdiff(e2->getVel(), vecmul(vecdiff(e2->getPos(), e1->getPos()), 2 * e1->getMass() / (e1->getMass() + e2->getMass()) * scalprod(vecdiff(e2->getVel(), e1->getVel()), vecdiff(e2->getPos(), e1->getPos())) / scalprod(vecdiff(e2->getPos(), e1->getPos()), vecdiff(e2->getPos(), e1->getPos()))));
 	e1->setVel(v1);
