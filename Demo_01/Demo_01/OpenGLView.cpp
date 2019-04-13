@@ -64,7 +64,7 @@ void OpenGLView::drawCircle(float x, float y, float radius, color4f color)
 	y += SCREEN_HEIGHT / 2;
 	glPushMatrix();
 	glColor4f(color.r, color.g, color.b, color.a);
-	float twicepi = 2 * 3.142;
+	float twicepi = 2 * PI;
 	float step = twicepi / (BASE_CIRCLE_SEGMENTS + radius * CIRCLE_SEGMENTS_SCALING);
 	glBegin(GL_POLYGON);
 	for (float a = 0.0f; a < twicepi; a += step)
@@ -79,10 +79,12 @@ void OpenGLView::drawAnnulus(float x, float y, float innerRad, float outerRad, c
 	y += SCREEN_HEIGHT / 2;
 	glPushMatrix();
 	glColor4f(color.r, color.g, color.b, color.a);
-	float twicepi = 2 * 3.142;
+	float twicepi = 2 * PI;
 	float step = twicepi / (BASE_CIRCLE_SEGMENTS + innerRad * CIRCLE_SEGMENTS_SCALING);
 	for (float a = 0.0f; a < twicepi; a += step)
 	{
+		if (a + step >= twicepi)
+			step = twicepi - a;
 		glBegin(GL_POLYGON);
 		glVertex2d(x + outerRad * cos(a), y + outerRad * sin(a));
 		glVertex2d(x + outerRad * cos(a + step), y + outerRad * sin(a + step));

@@ -124,6 +124,7 @@
     <ClInclude Include="commons.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="2Dvec.h" />
+    <ClInclude Include="rand_util.h" />
     <ClInclude Include="OpenGLCommandEmitter.h" />
     <ClInclude Include="OpenGLView.h" />
     <ClInclude Include="Player.h" />
@@ -140,6 +141,7 @@
     <ClCompile Include="OpenGLView.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Presenter.cpp" />
+    <ClCompile Include="rand_util.cpp" />
     <ClCompile Include="View.cpp" />
   </ItemGroup>
   <ItemGroup>

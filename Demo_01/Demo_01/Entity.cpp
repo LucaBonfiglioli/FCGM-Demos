@@ -69,8 +69,8 @@ void Entity::setColor(color4f color)
 void Entity::move(vec force, float time)
 {
 	vec acc = force;
-	acc.x /= this->getMass();
-	acc.y /= this->getMass();
+	acc.x /= abs(this->getMass());
+	acc.y /= abs(this->getMass());
 	vec pos = this->getPos();
 	pos.x += 1 / 2 * acc.x * pow(time, 2) + this->getVel().x * time;
 	pos.y += 1 / 2 * acc.y * pow(time, 2) + this->getVel().y * time;

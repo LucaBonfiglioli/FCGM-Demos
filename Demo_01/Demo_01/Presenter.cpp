@@ -1,13 +1,11 @@
 #pragma once
 #include "Presenter.h"
 #include "OpenGLView.h"
-#include <iostream>
-#include <ctime>
-#include <random>
 
 Presenter::Presenter()
 {
 	this->entities = new std::vector<Entity*>();
+	this->particles = new std::vector<Entity*>();
 	this->view = new OpenGLView();
 	this->player = NULL;
 	this->newGame();
@@ -18,6 +16,7 @@ Presenter::Presenter()
 		this->keys[i] = false;
 
 	this->lastFrame = std::chrono::high_resolution_clock::now();
+	this->updateFrameTime();
 }
 
 void Presenter::receive(Command cmd)
@@ -40,28 +39,27 @@ void Presenter::startGameLoop()
 	this->view->startGameLoop(this);
 }
 
-float Presenter::getFrameTime()
+void Presenter::updateFrameTime()
 {
 	std::chrono::high_resolution_clock::time_point curtime = std::chrono::high_resolution_clock::now();
 	long long frameTimeNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(curtime - this->lastFrame).count();
 	this->lastFrame = curtime;
 	float frameTime = (float)frameTimeNanos / GAME_SPEED;
-	return frameTime;
+	this->frameTime = frameTime;
 }
 
-void Presenter::addEntity()
+Entity * Presenter::randomEntity()
 {
-	float mass = ((float)rand() / (float)RAND_MAX) * (ENTITY_MASS_MAX - ENTITY_MASS_MIN) + ENTITY_MASS_MIN;
+	float mass = rand_u(ENTITY_MASS_MIN, ENTITY_MASS_MAX);
 	vec pos
 	{ 
-		((float)rand() / (float)RAND_MAX) * SCREEN_WIDTH - SCREEN_WIDTH / 2,
-		((float)rand() / (float)RAND_MAX) * SCREEN_HEIGHT - SCREEN_HEIGHT / 2
+		rand_u(-SCREEN_WIDTH / 2, SCREEN_WIDTH / 2),
+		rand_u(-SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2)
 	};
 	vec vel{ 0.0f, 0.0f };
-	float density = ((float)rand() / (float)RAND_MAX) * (ENTITY_DENSITY_MAX - ENTITY_DENSITY_MIN) + ENTITY_DENSITY_MIN;
+	float density = rand_u(ENTITY_DENSITY_MIN, ENTITY_DENSITY_MAX);
 	
-	int neg = (rand() % 2) * 2 - 1;
-	//neg = abs(neg);
+	int neg = rand_b() * 2 - 1;
 
 	color4f c = ENTITY_BASE_COLOR;
 
@@ -80,14 +78,28 @@ void Presenter::addEntity()
 		c.b += ENTITY_COLOR_RANGE_NEG.b * (density - ENTITY_DENSITY_MIN) / (ENTITY_DENSITY_MAX - ENTITY_DENSITY_MIN);
 	}
 	Entity * e = new Entity(neg*mass, pos, vel, density, c);
+	return e;
+}
+
+void Presenter::addEntity(Entity * e)
+{
 	this->entities->push_back(e);
 }
 
 void Presenter::removeEntity(int index)
 {
-	Entity * e = this->entities->at(index);
 	this->entities->erase(this->entities->begin() + index);
-	delete e;
+}
+
+void Presenter::addParticle(Entity * e)
+{
+	this->particles->push_back(e);
+}
+
+void Presenter::removeParticle(int index)
+{
+	delete this->particles->at(index);
+	this->particles->erase(this->particles->begin() + index);
 }
 
 void Presenter::cleanSingleHitInputs()
@@ -116,8 +128,9 @@ float Presenter::calculateEnergy()
 	return result;
 }
 
-void Presenter::moveEntities(float time)
+void Presenter::moveEntities()
 {
+	float time = this->frameTime;
 	for (int i = 0; i < this->entities->size(); i++)
 	{
 		vec totalForce{ 0.0f, 0.0f };
@@ -139,8 +152,9 @@ void Presenter::moveEntities(float time)
 	}
 }
 
-void Presenter::movePlayer(float time)
+void Presenter::movePlayer()
 {
+	float time = this->frameTime;
 	vec playerForce{ 0.0f, 0.0f };
 	for (int j = 0; j < this->entities->size(); j++)
 	{
@@ -181,6 +195,49 @@ void Presenter::movePlayer(float time)
 	this->player->move(playerForce, time);
 }
 
+void Presenter::moveParticles()
+{
+	float time = this->frameTime;
+
+	for (int i = 0; i < this->entities->size(); i++)
+	{
+		Entity * e = this->entities->at(i);
+		float r = rand_u(0.0f, 1.0f);
+		if (r < time * PARTICLE_SPAWN_CHANCE)
+		{
+			float mass = ENTITY_MASS_MAX / 6;
+			vec vel = vecmul(e->getVel(), -rand_u(1.0f, PARTICLE_SPEED_RANGE + 1.0f));
+			float angle = rand_z(0.0f, PARTICLE_ANGLE_SIGMA);
+			vec rvel = { vel.x * cos(angle) - vel.y * sin(angle), vel.x * sin(angle) + vel.y * cos(angle) };
+			vec pos = vecsum(e->getPos(), vecmul(rvel, e->getRadius() / norm(rvel)));
+			float density = ENTITY_DENSITY_MAX;
+			color4f color = e->getColor();
+			color.b /= PARTICLE_COLOR_COEFF, color.g /= PARTICLE_COLOR_COEFF, color.r /= PARTICLE_COLOR_COEFF;
+			this->addParticle(new Entity(mass, pos, rvel, density, color));
+		}
+	}
+
+	for (int i = 0; i < this->particles->size(); i++)
+	{
+		Entity * p = this->particles->at(i);
+		if (p->getColor().a <= 0.0f)
+		{
+			this->removeParticle(i);
+			i--;
+			continue;
+		}
+		p->move(vec{ 0.0f, 0.0f }, time);
+
+		color4f color = p->getColor();
+		float fading = 1.0f - color.a;
+		float sign = abs(p->getMass()) / p->getMass();
+		float dFading = time * PARTICLE_FADING_SPEEED;
+		color.a -= dFading;
+		p->setMass(p->getMass()*(PARTICLE_SCALING - fading + 1.0f)/(PARTICLE_SCALING - fading - dFading + 1.0f));
+		p->setColor(color);
+	}
+}
+
 void Presenter::handleCollisions()
 {
 	for (int i = 0; i < this->entities->size(); i++)
@@ -196,30 +253,32 @@ void Presenter::handleCollisions()
 
 void Presenter::gameLoop()
 {
-	float frameTimeMillis = this->getFrameTime();
+	this->updateModel();
+	this->presentScene();
+	this->cleanSingleHitInputs();
+	view->drawScene();
+}
 
-	static bool reset = false;
-
+void Presenter::updateModel()
+{
+	this->updateFrameTime();
 	if (this->keys[RESET])
 		this->newGame();
-
 	this->handleCollisions();
-
-	this->moveEntities(frameTimeMillis);
-	this->movePlayer(frameTimeMillis);
-
-	this->presentEntities();
-	//std::cout << this->calculateEnergy() / this->initialEnergy << "\n";
-
-	this->cleanSingleHitInputs();
-
-	view->drawScene();
+	this->moveEntities();
+	this->movePlayer();
+	this->moveParticles();
 }
 
 void Presenter::newGame()
 {
-	for (int i = 0; i < this->entities->size(); i++)
-		this->removeEntity(i);
+	int entities = this->entities->size();
+	for (int i = 0; i < entities; i++)
+		this->removeEntity(0);
+
+	int particles = this->particles->size();
+	for (int i = 0; i < particles; i++)
+		this->removeParticle(0);
 
 	if (this->player != NULL)
 		delete this->player;
@@ -227,18 +286,23 @@ void Presenter::newGame()
 	this->player = new Player(PLAYER_MASS, PLAYER_POS, PLAYER_VEL, PLAYER_DENSITY, PLAYER_COLOR);
 
 	for (int i = 0; i < ENTITIES; i++)
-		this->addEntity();
+		this->addEntity(this->randomEntity());
 
 	this->initialEnergy = this->calculateEnergy();
 }
 
-void Presenter::presentEntities()
+void Presenter::presentScene()
 {
 	Entity * entity;
 
-	view->drawAnnulus(player->getPos().x, player->getPos().y, player->getRadius() * 2, player->getRadius() * 2 + 5.0f, PLAYER_COLOR);
-	view->drawAnnulus(player->getPos().x, player->getPos().y, player->getRadius() * 3, player->getRadius() * 3 + 5.0f, PLAYER_COLOR);
+	// Particles
+	for (int i = 0; i < this->particles->size(); i++)
+	{
+		entity = this->particles->at(i);
+		view->drawCircle(entity->getPos().x, entity->getPos().y, entity->getRadius(), entity->getColor());
+	}
 
+	// Entities annulus
 	for (int i = 0; i < this->entities->size(); i++)
 	{
 		entity = this->entities->at(i);
@@ -246,21 +310,27 @@ void Presenter::presentEntities()
 		float outerRad = innerRad + ANNULUS_THICKNESS;
 		view->drawAnnulus(entity->getPos().x, entity->getPos().y, innerRad, outerRad, ANNULUS_COLOR);
 	}
+	
+	// Player annuli
+	view->drawAnnulus(player->getPos().x, player->getPos().y, player->getRadius() * 2, player->getRadius() * 2 + 5.0f, PLAYER_COLOR);
+	view->drawAnnulus(player->getPos().x, player->getPos().y, player->getRadius() * 3, player->getRadius() * 3 + 5.0f, PLAYER_COLOR);
+	
+	// Entities body
 	for (int i = 0; i < this->entities->size(); i++)
 	{
 		entity = this->entities->at(i);
 		view->drawCircle(entity->getPos().x, entity->getPos().y, entity->getRadius(), entity->getColor());
-		float innerRad = entity->getRadius() * 9/10;
+		float innerRad = entity->getRadius() * ENTITY_BORDER_SCALING;
 		float outerRad = entity->getRadius() + 1.0f;
 		color4f color = entity->getColor();
-		color.r /= 2.0; 
-		color.g /= 2.0; 
-		color.b /= 2.0;
+		color.r /= ENTITY_BORDER_COLOR_COEFF; 
+		color.g /= ENTITY_BORDER_COLOR_COEFF;
+		color.b /= ENTITY_BORDER_COLOR_COEFF;
 		view->drawAnnulus(entity->getPos().x, entity->getPos().y, innerRad, outerRad, color);
 	}
 	
+	// player body
 	view->drawCircle(player->getPos().x, player->getPos().y, player->getRadius(), player->getColor());
-
 }
 
 Presenter::~Presenter()

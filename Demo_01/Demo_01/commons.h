@@ -1,5 +1,7 @@
 #pragma once
 
+#define PI 3.14159265f
+
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 #define FRAMETIME 0
@@ -28,10 +30,19 @@
 #define ENTITY_COLOR_RANGE color4f{ 0.5f, -0.5f, 0.2f, 1.0f }
 #define ENTITY_BASE_COLOR_NEG color4f{ 0.1f, 0.2f, 1.0f, 1.0f }
 #define ENTITY_COLOR_RANGE_NEG color4f{ 0.2f, 0.8f, -0.9f, 1.0f }
+#define ENTITY_BORDER_SCALING 0.9f
+#define ENTITY_BORDER_COLOR_COEFF 2.0f
 
-#define ANNULUS_COLOR color4f{ 0.18f, 0.17f, 0.17f, 1.0f }
-#define ANNULUS_THICKNESS 10.0f
+#define ANNULUS_COLOR color4f{ 0.22f, 0.21f, 0.21f, 0.5f }
+#define ANNULUS_THICKNESS 5.0f
 #define ANNULUS_INRAD_SCALING 20.0f
+
+#define PARTICLE_SPAWN_CHANCE 1000.0f
+#define PARTICLE_FADING_SPEEED 1.0f
+#define PARTICLE_SPEED_RANGE 1.0f
+#define PARTICLE_ANGLE_SIGMA 1.5f
+#define PARTICLE_SCALING 0.05f
+#define PARTICLE_COLOR_COEFF 3.0f
 
 #define ENTITIES 20
 
