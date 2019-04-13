@@ -7,23 +7,21 @@ class Entity
 {
 private:
 	float mass;
-	float gmass;
 	vec pos;
 	vec vel;
-	float radius;
+	float density;
 	color4f color;
 public:
-	Entity(float mass, float gmass, vec pos, vec vel, float radius, color4f color);
+	Entity(float mass, vec pos, vec vel, float density, color4f color);
 	virtual float getMass() const; 
 	virtual void setMass(float value);
-	virtual float getGmass() const;
-	virtual void setGmass(float value);
 	virtual vec getPos() const;
 	virtual void setPos(vec pos);
 	virtual vec getVel() const;
 	virtual void setVel(vec vel);
+	virtual float getDensity() const;
+	virtual void setDensity(float value);
 	virtual float getRadius() const;
-	virtual void setRadius(float value);
 	virtual color4f getColor() const;
 	virtual void setColor(color4f color);
 	virtual void move(vec force, float time);

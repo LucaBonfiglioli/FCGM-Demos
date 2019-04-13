@@ -6,7 +6,7 @@ class Player :
 private:
 	float fuel;
 public:
-	Player(float mass, float gmass, vec pos, vec vel, float radius, color4f color);
+	Player(float mass, vec pos, vec vel, float density, color4f color);
 	virtual float getFuel();
 	virtual void setFuel(float value);
 	virtual void consumeFuel(float time);

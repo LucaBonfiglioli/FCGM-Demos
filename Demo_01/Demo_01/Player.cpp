@@ -1,9 +1,10 @@
 #include "Player.h"
 
 
-Player::Player(float mass, float gmass, vec pos, vec vel, float radius, color4f color)
-	:Entity(mass, gmass, pos, vel, radius, color)
+Player::Player(float mass, vec pos, vec vel, float density, color4f color)
+	:Entity(mass, pos, vel, density, color)
 {
+	this->fuel = 0.0f;
 	this->setFuel(1.0f);
 }
 

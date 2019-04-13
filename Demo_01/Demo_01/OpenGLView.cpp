@@ -12,6 +12,8 @@ OpenGLView::OpenGLView()
 	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Game Loop Demo");
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	viewInstance = this;
 	glutDisplayFunc(drawSceneCallback);
 	//glutMouseFunc(mouseClick);
@@ -63,10 +65,31 @@ void OpenGLView::drawCircle(float x, float y, float radius, color4f color)
 	glPushMatrix();
 	glColor4f(color.r, color.g, color.b, color.a);
 	float twicepi = 2 * 3.142;
+	float step = twicepi / (BASE_CIRCLE_SEGMENTS + radius * CIRCLE_SEGMENTS_SCALING);
 	glBegin(GL_POLYGON);
-	for (float a = 0; a < twicepi; a += twicepi / 20)
+	for (float a = 0.0f; a < twicepi; a += step)
 		glVertex2d(x + radius * cos(a), y + radius * sin(a));
 	glEnd();
+	glPopMatrix();
+}
+
+void OpenGLView::drawAnnulus(float x, float y, float innerRad, float outerRad, color4f color)
+{
+	x += SCREEN_WIDTH / 2;
+	y += SCREEN_HEIGHT / 2;
+	glPushMatrix();
+	glColor4f(color.r, color.g, color.b, color.a);
+	float twicepi = 2 * 3.142;
+	float step = twicepi / (BASE_CIRCLE_SEGMENTS + innerRad * CIRCLE_SEGMENTS_SCALING);
+	for (float a = 0.0f; a < twicepi; a += step)
+	{
+		glBegin(GL_POLYGON);
+		glVertex2d(x + outerRad * cos(a), y + outerRad * sin(a));
+		glVertex2d(x + outerRad * cos(a + step), y + outerRad * sin(a + step));
+		glVertex2d(x + innerRad * cos(a + step), y + innerRad * sin(a + step));
+		glVertex2d(x + innerRad * cos(a), y + innerRad * sin(a));
+		glEnd();
+	}
 	glPopMatrix();
 }
 

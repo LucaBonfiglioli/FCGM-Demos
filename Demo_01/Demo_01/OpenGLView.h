@@ -6,6 +6,9 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#define BASE_CIRCLE_SEGMENTS 20
+#define CIRCLE_SEGMENTS_SCALING 0.5f
+
 class OpenGLView : 
 	public View
 {
@@ -19,6 +22,7 @@ public:
 	virtual void manageControlReleased(unsigned char key, int x, int y);
 	virtual void startGameLoop(Presenter * presenter);
 	virtual void drawCircle(float x, float y, float radius, color4f color);
+	virtual void drawAnnulus(float x, float y, float innerRad, float outerRad, color4f color);
 	~OpenGLView();
 };
 
