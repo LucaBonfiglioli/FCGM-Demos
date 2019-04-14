@@ -1,5 +1,6 @@
 #pragma once
 #include "Entity.h"
+#include <iostream>
 
 Entity::Entity(float mass, vec pos, vec vel, float density, color4f color)
 {
@@ -17,8 +18,13 @@ float Entity::getMass() const
 
 void Entity::setMass(float value) 
 {
-	this->setVel(vecmul(this->getVel(), this->getMass() / value));
 	this->mass = value;
+}
+
+void Entity::gainMass(float value)
+{
+	this->setVel(vecmul(this->getVel(), abs(this->getMass() / (value + this->getMass()))));
+	this->setMass(this->getMass() + value);
 }
 
 vec Entity::getPos() const
@@ -66,6 +72,11 @@ void Entity::setColor(color4f color)
 	this->color = color;
 }
 
+int Entity::getSign()
+{
+	return (this->getMass() >= 0.0f) ? 1 : -1;
+}
+
 void Entity::move(vec force, float time)
 {
 	vec acc = force;
@@ -79,28 +90,6 @@ void Entity::move(vec force, float time)
 	vel.x += acc.x * time;
 	vel.y += acc.y * time;
 	this->setVel(vel);
-
-	if (this->getPos().x > 400)
-	{
-		this->setPos(vec{ 400.0f, this->getPos().y });
-		this->setVel(vec{ -this->getVel().x, this->getVel().y });
-	}
-	if (this->getPos().x < -400)
-	{
-		this->setPos(vec{ -400.0f, this->getPos().y });
-		this->setVel(vec{ -this->getVel().x, this->getVel().y });
-	}
-	if (this->getPos().y > 300)
-	{
-		this->setPos(vec{ this->getPos().x, 300.0f });
-		this->setVel(vec{ this->getVel().x, -this->getVel().y });
-	}
-	if (this->getPos().y < -300)
-	{
-		this->setPos(vec{ this->getPos().x, -300.0f });
-		this->setVel(vec{ this->getVel().x, -this->getVel().y });
-	}
-
 }
 
 vec Entity::getAccelerationAt(vec pos) const
@@ -109,8 +98,8 @@ vec Entity::getAccelerationAt(vec pos) const
 	float dist = sqrt(pow(pos.x - this->getPos().x, 2) + pow(pos.y - this->getPos().y, 2));
 	if (dist < density)
 		return acc;
-	acc.x = GRAV_CONSTANT * this->getMass() * (this->getPos().x - pos.x) / pow(dist, 3);
-	acc.y = GRAV_CONSTANT * this->getMass() * (this->getPos().y - pos.y) / pow(dist, 3);
+	acc.x = -GRAV_CONSTANT * this->getMass() * (this->getPos().x - pos.x) / pow(dist, 3);
+	acc.y = -GRAV_CONSTANT * this->getMass() * (this->getPos().y - pos.y) / pow(dist, 3);
 	return acc;
 }
 
@@ -136,7 +125,7 @@ bool Entity::areColliding(Entity * e1, Entity * e2)
 	return dist < (e1->getRadius() + e2->getRadius());
 }
 
-void Entity::handleCollision(Entity * e1, Entity * e2)
+void Entity::elasticCollision(Entity * e1, Entity * e2)
 {
 	if (!Entity::areColliding(e1, e2))
 		return;
@@ -167,6 +156,51 @@ void Entity::handleCollision(Entity * e1, Entity * e2)
 		e2->setPos(newP2);
 		d = vecmul(d, 1.01f);
 	}
+}
+
+void Entity::inelasticCollision(Entity * e1, Entity * e2)
+{
+	if (!Entity::areColliding(e1, e2))
+		return;
+
+	float r1 = e1->getRadius();
+	float r2 = e2->getRadius();
+
+	if (r1 > r2)
+	{
+		float tmpr = r1;
+		r1 = r2;
+		r2 = tmpr;
+		Entity * tmpe = e1;
+		e1 = e2;
+		e2 = tmpe;
+	}
+
+	vec v1 = e1->getVel();
+	vec v2 = e2->getVel();
+	vec p1 = e1->getPos();
+	vec p2 = e2->getPos();
+	float m1 = abs(e1->getMass());
+	float m2 = abs(e2->getMass());
+	float d1 = e1->getDensity();
+	float d2 = e2->getDensity();
+
+	float d = norm(vecdiff(p1, p2));
+	float c = (r1 + r2 - d)/(2 * r1);
+	c = c < 0.0f ? 0.0f : c;
+	c = c > 1.0f ? 1.0f : c;
+
+	float mt = m1 * c;
+
+	vec vf = vecmul(vecsum(vecmul(v1, mt), vecmul(v2, m2)), 1 / (mt + m2));
+	mt *= e1->getSign();
+	m1 *= e1->getSign();
+	m2 *= e2->getSign();
+	e2->setMass(m2 + mt);
+	e1->setMass(m1 - mt);
+	if (m1 * m2 >= 0)
+		e2->setDensity(abs((mt * d1 + m2 * d2) / (mt + m2)));
+	e2->setVel(vf);
 }
 
 Entity::~Entity()

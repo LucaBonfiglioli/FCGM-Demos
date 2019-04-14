@@ -81,6 +81,8 @@ void OpenGLView::drawAnnulus(float x, float y, float innerRad, float outerRad, c
 	glColor4f(color.r, color.g, color.b, color.a);
 	float twicepi = 2 * PI;
 	float step = twicepi / (BASE_CIRCLE_SEGMENTS + innerRad * CIRCLE_SEGMENTS_SCALING);
+	if (innerRad < 0)
+		std::cout << innerRad << "\n";
 	for (float a = 0.0f; a < twicepi; a += step)
 	{
 		if (a + step >= twicepi)

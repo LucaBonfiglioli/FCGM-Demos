@@ -28,10 +28,12 @@ private:
 	virtual void movePlayer();
 	virtual void moveParticles();
 	virtual void handleCollisions();
+	virtual void bounceOnBorders(Entity * e);
 	virtual void updateFrameTime();
 	virtual Entity * randomEntity();
 	virtual void addEntity(Entity * e);
 	virtual void removeEntity(int index);
+	virtual color4f getEntityColor(int sign, float density);
 	virtual void addParticle(Entity * e);
 	virtual void removeParticle(int index);
 	virtual void cleanSingleHitInputs();

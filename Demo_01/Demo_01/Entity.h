@@ -13,8 +13,9 @@ private:
 	color4f color;
 public:
 	Entity(float mass, vec pos, vec vel, float density, color4f color);
-	virtual float getMass() const; 
+	virtual float getMass() const;
 	virtual void setMass(float value);
+	virtual void gainMass(float value);
 	virtual vec getPos() const;
 	virtual void setPos(vec pos);
 	virtual vec getVel() const;
@@ -24,10 +25,12 @@ public:
 	virtual float getRadius() const;
 	virtual color4f getColor() const;
 	virtual void setColor(color4f color);
+	virtual int getSign();
 	virtual void move(vec force, float time);
 	virtual vec getAccelerationAt(vec pos) const;
 	virtual vec getForceAt(Entity * e) const;
 	static bool areColliding(Entity * e1, Entity * e2);
-	static void handleCollision(Entity * e1, Entity * e2);
+	static void elasticCollision(Entity * e1, Entity * e2);
+	static void inelasticCollision(Entity * e1, Entity * e2);
 	~Entity();
 };
