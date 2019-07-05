@@ -22,7 +22,7 @@ public:
 	virtual void manageControlReleased(unsigned char key, int x, int y);
 	virtual void startGameLoop(Presenter * presenter);
 	virtual void drawCircle(float x, float y, float radius, color4f color);
-	virtual void drawAnnulus(float x, float y, float innerRad, float outerRad, color4f color);
+	virtual void drawRing(float x, float y, float innerRad, float outerRad, color4f color);
 	~OpenGLView();
 };
 

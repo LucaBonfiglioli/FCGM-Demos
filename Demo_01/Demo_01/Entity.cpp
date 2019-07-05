@@ -59,7 +59,8 @@ void Entity::setDensity(float value)
 
 float Entity::getRadius() const
 {
-	return abs(this->getMass()) / this->getDensity();
+	float area = abs(this->getMass()) / this->getDensity();
+	return sqrt(area / PI);
 }
 
 color4f Entity::getColor() const

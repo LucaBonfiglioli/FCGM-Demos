@@ -73,7 +73,7 @@ void OpenGLView::drawCircle(float x, float y, float radius, color4f color)
 	glPopMatrix();
 }
 
-void OpenGLView::drawAnnulus(float x, float y, float innerRad, float outerRad, color4f color)
+void OpenGLView::drawRing(float x, float y, float innerRad, float outerRad, color4f color)
 {
 	x += SCREEN_WIDTH / 2;
 	y += SCREEN_HEIGHT / 2;

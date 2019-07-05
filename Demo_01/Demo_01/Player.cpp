@@ -16,7 +16,7 @@ float Player::getFuel()
 void Player::setFuel(float value)
 {
 	this->setColor(color4f{ 1.0f - value , value, 0.2f, 1.0f });
-	this->gainMass((value - this->getFuel()) * FUEL_DENSITY);
+	this->gainMass((value - this->getFuel()) * this->getMass() / PLAYER_FUEL_MASS_RATIO);
 	this->fuel = value;
 }
 

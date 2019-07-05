@@ -6,6 +6,8 @@ Presenter::Presenter()
 {
 	this->entities = new std::vector<Entity*>();
 	this->particles = new std::vector<Entity*>();
+	this->entitiesToSpawn = new std::vector<Entity*>();
+	this->entitiesToSpawnTimers = new std::vector<float>();
 	this->view = new OpenGLView();
 	this->player = NULL;
 	this->newGame();
@@ -48,7 +50,7 @@ void Presenter::updateFrameTime()
 	this->frameTime = frameTime;
 }
 
-Entity * Presenter::randomEntity()
+Entity * Presenter::randomEntity(float sign_prob)
 {
 	float mass = rand_u(ENTITY_MASS_MIN, ENTITY_MASS_MAX);
 	vec pos
@@ -59,7 +61,10 @@ Entity * Presenter::randomEntity()
 	vec vel{ 0.0f, 0.0f };
 	float density = rand_u(ENTITY_DENSITY_MIN, ENTITY_DENSITY_MAX);
 	
-	int sign = rand_b() * 2 - 1;
+	int sign = 1;
+	float r = rand_u(0.0f, 1.0f);
+	if (r > sign_prob)
+		sign = -1;
 
 	color4f c = this->getEntityColor(sign, density);
 	
@@ -75,6 +80,20 @@ void Presenter::addEntity(Entity * e)
 void Presenter::removeEntity(int index)
 {
 	this->entities->erase(this->entities->begin() + index);
+}
+
+void Presenter::addEntityToSpawn(Entity * e)
+{
+	this->entitiesToSpawn->push_back(e);
+	this->entitiesToSpawnTimers->push_back(ENTITY_SPAWN_WARNING_TIME);
+}
+
+void Presenter::removeEntityToSpawn(int index, bool del)
+{
+	if (del)
+		delete this->entitiesToSpawn->at(index);
+	this->entitiesToSpawn->erase(this->entitiesToSpawn->begin() + index);
+	this->entitiesToSpawnTimers->erase(this->entitiesToSpawnTimers->begin() + index);
 }
 
 color4f Presenter::getEntityColor(int sign, float density)
@@ -139,9 +158,20 @@ void Presenter::moveEntities()
 	float time = this->frameTime;
 
 	float r = rand_u(0.0f, 1.0f);
-	if (r < time * ENTITY_SPAWN_CHANCE)
+	if (r < time * this->entitySpawnChance())
 	{
-		this->addEntity(this->randomEntity());
+		this->addEntityToSpawn(this->randomEntity((float)this->entitiesCount(1) / (float)this->entities->size()));
+	}
+
+	for (int i = 0; i < this->entitiesToSpawn->size(); i++)
+	{
+		this->entitiesToSpawnTimers->at(i) -= time;
+		if (this->entitiesToSpawnTimers->at(i) <= 0.0f)
+		{
+			this->addEntity(this->entitiesToSpawn->at(i));
+			this->removeEntityToSpawn(i, false);
+			i--;
+		}
 	}
 
 	for (int i = 0; i < this->entities->size(); i++)
@@ -216,12 +246,12 @@ void Presenter::movePlayer()
 		if (this->keys[RIGHT])
 			thrust.x += 1.0f;
 		if (norm(thrust) > 0.01f)
-			thrust = vecmul(thrust, THRUST_FORCE / norm(thrust));
+			thrust = vecmul(thrust, THRUST_ACCELERATION * player->getMass() / norm(thrust));
 	}
 	else
 	{
 		if (norm(player->getVel()) > 0.01f)
-			thrust = vecmul(player->getVel(), - THRUST_FORCE / norm(player->getVel()));
+			thrust = vecmul(player->getVel(), - THRUST_ACCELERATION * player->getMass() / norm(player->getVel()));
 	}
 	if (norm(thrust) > 0 && this->player->getFuel() > 0)
 	{
@@ -292,7 +322,7 @@ void Presenter::handleCollisions()
 
 	for (int i = 0; i < this->entities->size(); i++)
 	{
-		if (this->entities->at(i)->getMass() < 0.01 && this->entities->at(i)->getMass() > -0.01)
+		if (this->entities->at(i)->getMass() < 0.01f && this->entities->at(i)->getMass() > -0.01f)
 		{
 			this->removeEntity(i);
 			i--;
@@ -301,8 +331,11 @@ void Presenter::handleCollisions()
 		this->entities->at(i)->setColor(this->getEntityColor(this->entities->at(i)->getSign(), this->entities->at(i)->getDensity()));
 	}
 
-	if (this->player->getMass() < 0.01 && this->player->getMass() > -0.01)
-		this->newGame();
+	if (this->player->getMass() < 0.01f)
+		this->defeat();
+
+	if (this->entitiesCount(-1) <= 0)
+		this->victory();
 }
 
 void Presenter::gameLoop()
@@ -326,6 +359,10 @@ void Presenter::updateModel()
 
 void Presenter::newGame()
 {
+	int entitiesToSpawn = this->entitiesToSpawn->size();
+	for (int i = 0; i < entitiesToSpawn; i++)
+		this->removeEntityToSpawn(0, true);
+
 	int entities = this->entities->size();
 	for (int i = 0; i < entities; i++)
 		this->removeEntity(0);
@@ -339,8 +376,10 @@ void Presenter::newGame()
 
 	this->player = new Player(PLAYER_MASS, PLAYER_POS, PLAYER_VEL, PLAYER_DENSITY, PLAYER_COLOR);
 
-	for (int i = 0; i < ENTITIES; i++)
-		this->addEntity(this->randomEntity());
+	for (int i = 0; i < ENTITIES / 2; i++)
+		this->addEntity(this->randomEntity(0.0f));
+	for (int i = 0; i < ENTITIES / 2; i++)
+		this->addEntity(this->randomEntity(1.0f));
 
 	this->initialEnergy = this->calculateEnergy();
 }
@@ -348,6 +387,9 @@ void Presenter::newGame()
 void Presenter::presentScene()
 {
 	Entity * entity;
+	float innerRad = 0.0f;
+	float outerRad = 0.0f;
+	color4f color{ 0.0f, 0.0f, 0.0f, 0.0f };
 
 	// Particles
 	for (int i = 0; i < this->particles->size(); i++)
@@ -356,35 +398,102 @@ void Presenter::presentScene()
 		view->drawCircle(entity->getPos().x, entity->getPos().y, entity->getRadius(), entity->getColor());
 	}
 
-	// Entities annulus
+	// Entities ring
 	for (int i = 0; i < this->entities->size(); i++)
 	{
 		entity = this->entities->at(i);
-		float innerRad = entity->getRadius() + ANNULUS_INRAD_SCALING * (abs(entity->getMass())) / ENTITY_MASS_MAX;
-		float outerRad = innerRad + ANNULUS_THICKNESS;
-		view->drawAnnulus(entity->getPos().x, entity->getPos().y, innerRad, outerRad, ANNULUS_COLOR);
+		if (entity->getRadius() > player->getRadius())
+			color = RING_COLOR_DARK;
+		else
+			color = RING_COLOR_LIGHT;
+		innerRad = entity->getRadius() + RING_INRAD_SCALING * (abs(entity->getMass())) / ENTITY_MASS_MAX;
+		outerRad = innerRad + RING_THICKNESS;
+		view->drawRing(entity->getPos().x, entity->getPos().y, innerRad, outerRad, color);
 	}
 	
-	// Player annuli
-	view->drawAnnulus(player->getPos().x, player->getPos().y, player->getRadius() * 2, player->getRadius() * 2 + 5.0f, PLAYER_COLOR);
-	view->drawAnnulus(player->getPos().x, player->getPos().y, player->getRadius() * 3, player->getRadius() * 3 + 5.0f, PLAYER_COLOR);
+	// Player rings
+	innerRad = player->getRadius() + RING_INRAD_SCALING;
+	outerRad = innerRad + RING_THICKNESS;
+	view->drawRing(player->getPos().x, player->getPos().y, innerRad, outerRad, RING_COLOR_DARK);
+	innerRad += RING_THICKNESS * 2.0f;
+	outerRad = innerRad + RING_THICKNESS;
+	view->drawRing(player->getPos().x, player->getPos().y, innerRad, outerRad, RING_COLOR_DARK);
 	
+	// Entities spawn warning
+	for (int i = 0; i < this->entitiesToSpawn->size(); i++)
+	{
+		float r = 1.0f - this->entitiesToSpawnTimers->at(i) / ENTITY_SPAWN_WARNING_TIME;
+		entity = this->entitiesToSpawn->at(i);
+		innerRad = entity->getRadius() * ENTITY_BORDER_SCALING;
+		outerRad = entity->getRadius() + 1.0f;
+		color = entity->getColor();
+		color.r /= ENTITY_BORDER_COLOR_COEFF;
+		color.g /= ENTITY_BORDER_COLOR_COEFF;
+		color.b /= ENTITY_BORDER_COLOR_COEFF;
+		color.a = r;
+		view->drawRing(entity->getPos().x, entity->getPos().y, innerRad, outerRad, color);
+		innerRad *= r;
+		color = entity->getColor();
+		color.a = r;
+		view->drawCircle(entity->getPos().x, entity->getPos().y, innerRad, color);
+	}
+
 	// Entities body
 	for (int i = 0; i < this->entities->size(); i++)
 	{
 		entity = this->entities->at(i);
 		view->drawCircle(entity->getPos().x, entity->getPos().y, entity->getRadius(), entity->getColor());
-		float innerRad = entity->getRadius() * ENTITY_BORDER_SCALING;
-		float outerRad = entity->getRadius() + 1.0f;
-		color4f color = entity->getColor();
+		innerRad = entity->getRadius() * ENTITY_BORDER_SCALING;
+		outerRad = entity->getRadius() + 1.0f;
+		color = entity->getColor();
 		color.r /= ENTITY_BORDER_COLOR_COEFF; 
 		color.g /= ENTITY_BORDER_COLOR_COEFF;
 		color.b /= ENTITY_BORDER_COLOR_COEFF;
-		view->drawAnnulus(entity->getPos().x, entity->getPos().y, innerRad, outerRad, color);
+		view->drawRing(entity->getPos().x, entity->getPos().y, innerRad, outerRad, color);
 	}
 	
 	// player body
 	view->drawCircle(player->getPos().x, player->getPos().y, player->getRadius(), player->getColor());
+	innerRad = player->getRadius() * ENTITY_BORDER_SCALING;
+	outerRad = player->getRadius() + 1.0f;
+	color = player->getColor();
+	color.r /= ENTITY_BORDER_COLOR_COEFF;
+	color.g /= ENTITY_BORDER_COLOR_COEFF;
+	color.b /= ENTITY_BORDER_COLOR_COEFF;
+	view->drawRing(player->getPos().x, player->getPos().y, innerRad, outerRad, color);
+}
+
+int Presenter::entitiesCount(int sign) {
+	int pos = 0;
+	int neg = 0;
+	for (int i = 0; i < this->entities->size(); i++)
+		if (entities->at(i)->getMass() > 0)
+			pos++;
+		else
+			neg++;
+	if (sign > 0)
+		return pos;
+	else
+		return neg;
+}
+
+float Presenter::entitySpawnChance()
+{
+	float count = this->entities->size();
+	float res;
+	res = count / (count + 1);
+	res *= ENTITY_SPAWN_CHANCE;
+	return res;
+}
+
+void Presenter::victory()
+{
+	this->newGame();
+}
+
+void Presenter::defeat()
+{
+	this->newGame();
 }
 
 Presenter::~Presenter()

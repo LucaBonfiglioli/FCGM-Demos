@@ -13,6 +13,8 @@ class Presenter :
 private: 
 	std::vector<Entity*> * entities;
 	std::vector<Entity*> * particles;
+	std::vector<Entity*> * entitiesToSpawn;
+	std::vector<float> * entitiesToSpawnTimers;
 	Player * player;
 	View * view;
 	std::chrono::high_resolution_clock::time_point lastFrame;
@@ -30,14 +32,21 @@ private:
 	virtual void handleCollisions();
 	virtual void bounceOnBorders(Entity * e);
 	virtual void updateFrameTime();
-	virtual Entity * randomEntity();
+	virtual color4f getEntityColor(int sign, float density);
+	virtual Entity * randomEntity(float sign_prob);
 	virtual void addEntity(Entity * e);
 	virtual void removeEntity(int index);
-	virtual color4f getEntityColor(int sign, float density);
+	virtual void addEntityToSpawn(Entity * e);
+	virtual void removeEntityToSpawn(int index, bool del);
 	virtual void addParticle(Entity * e);
 	virtual void removeParticle(int index);
 	virtual void cleanSingleHitInputs();
 	virtual float calculateEnergy();
+	virtual int entitiesCount(int sign);
+	virtual float entitySpawnChance();
+	virtual void victory();
+	virtual void defeat();
+
 public:
 	Presenter();
 	virtual void receive(Command cmd);
