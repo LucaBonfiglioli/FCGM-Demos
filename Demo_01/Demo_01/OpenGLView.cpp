@@ -4,14 +4,17 @@
 OpenGLView::OpenGLView()
 {
 	this->emitter = new OpenGLCommandEmitter();
+	this->meshes = new std::vector<Mesh2D*>();
 
 	int argc = 0;
 	char * argv = NULL;
 	glutInit(&argc, &argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Game Loop Demo");
+	glewExperimental = GL_TRUE;
+	glewInit();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	viewInstance = this;
@@ -22,6 +25,41 @@ OpenGLView::OpenGLView()
 	glutSetKeyRepeat(0);
 	glutKeyboardUpFunc(manageControlReleasedCallback);
 	//glutPassiveMotionFunc(mouseMotion);
+	this->init();
+}
+
+void OpenGLView::init()
+{
+	Mesh2D * mesh = new Mesh2D();
+	
+	float twicepi = 2 * PI;
+	float step = twicepi / (BASE_CIRCLE_SEGMENTS);
+	mesh->vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+	for (float a = 0.0f; a < twicepi; a += step)
+		mesh->vertices.push_back(glm::vec3(cos(a), sin(a), 0.0f));
+	for (int i = 1; i < mesh->vertices.size(); i++)
+	{
+		mesh->indices.push_back(i);
+		mesh->indices.push_back(i == mesh->vertices.size() - 1 ? 1 : i+1);
+		mesh->indices.push_back(0);
+	}
+
+	this->meshes->push_back(mesh);
+
+	for (int i = 0; i < this->meshes->size(); i++)
+	{
+		Mesh2D * mesh = this->meshes->at(i);
+		glGenVertexArrays(1, &mesh->vertexArrayObjID);
+		glBindVertexArray(mesh->vertexArrayObjID);
+		glGenBuffers(1, &mesh->vertexBufferObjID);
+		glBindBuffer(GL_ARRAY_BUFFER, mesh->vertexBufferObjID);
+		glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(glm::vec3), &mesh->vertices[0], GL_STATIC_DRAW);
+		glVertexPointer(3, GL_FLOAT, 0, (void*)0);
+		glGenBuffers(1, &mesh->indexBufferObjID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferObjID);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indices.size() * sizeof(GLshort), &mesh->indices[0], GL_STATIC_DRAW);
+		std::cout << mesh->vertexArrayObjID << mesh->vertexBufferObjID << mesh->indexBufferObjID;
+	}
 }
 
 void OpenGLView::drawScene()
@@ -58,18 +96,35 @@ void OpenGLView::startGameLoop(Presenter * presenter)
 	glutMainLoop();
 }
 
+//void OpenGLView::drawCircle(float x, float y, float radius, color4f color)
+//{
+//	x += SCREEN_WIDTH / 2;
+//	y += SCREEN_HEIGHT / 2;
+//	glPushMatrix();
+//	glColor4f(color.r, color.g, color.b, color.a);
+//	float twicepi = 2 * PI;
+//	float step = twicepi / (BASE_CIRCLE_SEGMENTS + radius * CIRCLE_SEGMENTS_SCALING);
+//	glBegin(GL_POLYGON);
+//	for (float a = 0.0f; a < twicepi; a += step)
+//		glVertex2d(x + radius * cos(a), y + radius * sin(a));
+//	glEnd();
+//	glPopMatrix();
+//}
+
 void OpenGLView::drawCircle(float x, float y, float radius, color4f color)
 {
 	x += SCREEN_WIDTH / 2;
 	y += SCREEN_HEIGHT / 2;
+
 	glPushMatrix();
 	glColor4f(color.r, color.g, color.b, color.a);
-	float twicepi = 2 * PI;
-	float step = twicepi / (BASE_CIRCLE_SEGMENTS + radius * CIRCLE_SEGMENTS_SCALING);
-	glBegin(GL_POLYGON);
-	for (float a = 0.0f; a < twicepi; a += step)
-		glVertex2d(x + radius * cos(a), y + radius * sin(a));
-	glEnd();
+	glLoadIdentity();
+	
+	glTranslatef(x, y, 0.0f);
+	glScalef(radius, radius, 1.0f);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glBindVertexArray(this->meshes->at(0)->vertexArrayObjID);
+	glDrawElements(GL_TRIANGLES, this->meshes->at(0)->indices.size(), GL_UNSIGNED_SHORT, (void*)0);
 	glPopMatrix();
 }
 

@@ -276,12 +276,13 @@ void Presenter::moveParticles()
 		float r = rand_u(0.0f, 1.0f);
 		if (r < time * PARTICLE_SPAWN_CHANCE)
 		{
-			float mass = ENTITY_MASS_MAX / 6;
+			float mass = rand_u(e->getMass() / 6, e->getMass());
 			vec vel = vecmul({1.0f, 0.0f}, - sqrt(norm(e->getVel()) * e->getRadius()) * rand_u(1.0f, PARTICLE_SPEED_RANGE + 1.0f));
 			float angle = rand_u(0.0f, 2*PI);
 			vec rvel = { vel.x * cos(angle) - vel.y * sin(angle), vel.x * sin(angle) + vel.y * cos(angle) };
 			vec pos = vecsum(e->getPos(), vecmul(rvel, e->getRadius() / norm(rvel)));
-			float density = ENTITY_DENSITY_MAX;
+			//rvel = { 0.0f, 0.0f };
+			float density = e->getDensity();
 			color4f color = e->getColor();
 			color.b /= PARTICLE_COLOR_COEFF, color.g /= PARTICLE_COLOR_COEFF, color.r /= PARTICLE_COLOR_COEFF;
 			this->addParticle(new Entity(mass, pos, rvel, density, color));

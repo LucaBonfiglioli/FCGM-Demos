@@ -5,15 +5,27 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <glm/glm.hpp>
 
 #define BASE_CIRCLE_SEGMENTS 20
 #define CIRCLE_SEGMENTS_SCALING 0.5f
+
+typedef struct
+{
+	std::vector<glm::vec3> vertices;
+	std::vector<GLushort> indices;
+	GLuint vertexArrayObjID;
+	GLuint vertexBufferObjID;
+	GLuint indexBufferObjID;
+} Mesh2D;
 
 class OpenGLView : 
 	public View
 {
 private:
 	OpenGLCommandEmitter * emitter;
+	std::vector<Mesh2D*> * meshes;
+	virtual void init();
 public:
 	OpenGLView();
 	virtual void drawScene();
